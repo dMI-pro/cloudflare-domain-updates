@@ -1,4 +1,4 @@
-const api = require("./views/api");
+const api = require("./views/apiDomain");
 const jsonFile = require("./list.json");
 const csvToJson = require("csvtojson");
 const XLSX = require("xlsx");
@@ -8,7 +8,8 @@ const method = process.argv[2];
 // list of domain json/csv/xlsx/Name
 const type = process.argv[3];
 // validating a domain name
-const regExp = /^(?:[-A-Za-z0-9]+\.)+[A-Za-z]{2,6}$/;
+// const regExp = /^(?:[-A-Za-z0-9]+\.)+[A-Za-z]{2,6}$/; // паттерн из интрнета
+const regExp = /^([a-zA-Z0-9][\-a-zA-Z0-9]*\.)+[\-a-zA-Z0-9]{2,20}$/; // паттерн с cloudFlare API
 
 function checkMethod(method, type, funcAdd, funcDelete) {
     if (method.toLowerCase() === 'add') {

@@ -2,7 +2,7 @@ const axios = require("axios");
 const constants = require("../constants");
 const {CF_API_EMAIL, CF_API_KEY, URL_ADD_DELETE_DOMAIN} = require("../constants");
 
-let dataAxios = {
+const dataAxios = {
     "id": "",
     "name": ""
 };
@@ -83,6 +83,7 @@ const getDomainID = async (domain) => {
     try {
         const response = await axios(configAxios);
         // data validation when re-deleting a domain, the request is executed without errors, but the data is empty
+        console.log("id_domain->", response.data.result[0].id)
         if (!response.data.result[0]) return undefined;
         return response.data.result[0].id;
     } catch (e) {
@@ -141,6 +142,8 @@ const deleteJsonOrCsvOrXlsxDomain = async (domains) => {
 
 
 // module.exports = addDomainToCloudFlare;
+exports.getUserID = getUserID;
+exports.getDomainID = getDomainID;
 exports.addNameDomain = addNameDomain;
 exports.deleteNameDomain = deleteNameDomain;
 exports.addJsonOrCsvOrXlsxDomain = addJsonOrCsvOrXlsxDomain;
