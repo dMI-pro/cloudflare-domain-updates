@@ -1,0 +1,24 @@
+{
+  "name": "zg-cloudflare-updater",
+  "version": "1.1.1",
+  "description": "aa  A CLI application to manage domains list in CloudFlare",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/zgpm/zg-cloudflare-updater.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/zgpm/zg-cloudflare-updater/issues"
+  },
+  "homepage": "https://gitlab.com/zgpm/zg-cloudflare-updater#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "csvtojson": "^2.0.10",
+    "xlsx": "^0.18.5"
+  }
+}
