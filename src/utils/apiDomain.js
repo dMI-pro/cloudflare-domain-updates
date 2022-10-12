@@ -1,12 +1,12 @@
+require('dotenv').config({path: './_env/.env.example'});
+const {CF_API_EMAIL, CF_API_KEY, URL_ADD_DELETE_DOMAIN} = process.env;
+let {ID_USER, ID_DOMAIN} = process.env;
 const axios = require("axios");
-const constants = require("../constants");
-const {CF_API_EMAIL, CF_API_KEY, URL_ADD_DELETE_DOMAIN} = require("../constants");
 
 const dataAxios = {
     "id": "",
     "name": ""
 };
-
 const configAxios = {
     method: "post",
     url: "",
@@ -25,15 +25,17 @@ const getUserID = async () => {
         const response = await axios(configAxios);
         return response.data.result.id;
     } catch (e) {
-        console.log(e.response.data);
+        console.error(e.response.data.errors);
     }
 }
 
 const addNameDomain = async (domain) => {
-    if (!constants.ID_USER) {
-        constants.ID_USER = await getUserID();
+    ID_USER = await getUserID();
+    if (!ID_USER) {
+        console.log(`Incorrect username or password for the user`)
+        return
     }
-    dataAxios.id = constants.ID_USER;
+    dataAxios.id = ID_USER;
     dataAxios.name = domain;
 
     configAxios.method = "POST";
@@ -42,24 +44,25 @@ const addNameDomain = async (domain) => {
 
     try {
         const response = await axios(configAxios);
-        console.log(`${response.data.result[0].name} - добавлен в CloudFlare`);
+        console.log(`${response.data.result[0].name} - successfully adding from CloudFlare`);
     } catch (e) {
-        console.error(e.response.data)
+        console.error(e.response.data.errors);
     }
 }
 
 const addJsonOrCsvOrXlsxDomain = async (domains) => {
-    if (!constants.ID_USER) {
-        constants.ID_USER = await getUserID();
+    ID_USER = await getUserID();
+    if (!ID_USER) {
+        console.log(`Incorrect username or password for the user`)
+        return
     }
 
-    dataAxios.id = constants.ID_USER;
+    dataAxios.id = ID_USER;
 
     configAxios.method = "POST";
     configAxios.url = URL_ADD_DELETE_DOMAIN;
 
-    for (let domain of domains) {
-        // data check if CVS or XLSX -> domain.domain. If JSON domain
+    domains.map(async domain =>  {
         domain.domain === undefined
             ? dataAxios.name = domain
             : dataAxios.name = domain.domain
@@ -68,11 +71,12 @@ const addJsonOrCsvOrXlsxDomain = async (domains) => {
 
         try {
             const response = await axios(configAxios);
-            console.log(`${response.data.result[0].name} - добавлен в CloudFlare`)
+            console.log(`${response.data.result[0].name} - successfully adding from CloudFlare`)
         } catch (e) {
-            console.error(e.response.data)
+            console.error(e.response.data.errors);
         }
-    }
+
+    })
 }
 
 // functions for deleting a domain
@@ -83,29 +87,31 @@ const getDomainID = async (domain) => {
     try {
         const response = await axios(configAxios);
         // data validation when re-deleting a domain, the request is executed without errors, but the data is empty
-        console.log("id_domain->", response.data.result[0].id)
         if (!response.data.result[0]) return undefined;
         return response.data.result[0].id;
     } catch (e) {
-        console.error(e)
+        console.error(e.response.data.errors);
     }
 }
 
 const deleteNameDomain = async (domain) => {
-    if (!constants.ID_DOMAIN) {
-        constants.ID_DOMAIN = await getDomainID(domain);
-        if (!constants.ID_DOMAIN) {
+    if (!ID_DOMAIN) {
+        ID_DOMAIN = await getDomainID(domain);
+        if (!ID_DOMAIN) {
             console.log(`${domain} domain not found in CloudFlare`);
             return;
         }
+    } else {
+        console.log('Domain cannot be empty');
+        return;
     }
     configAxios.method = "DELETE";
-    configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${constants.ID_DOMAIN}`;
-    console.log(configAxios.url)
+    configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${ID_DOMAIN}`;
 
     try {
         const response = await axios(configAxios);
-        if (response.data.success) console.log(`${domain} deleted successfully`);
+        // data validation when re-deleting a domain, the request is executed without errors, but the data is empty
+        if (response.data.success) console.log(`${domain} successfully removed from CloudFlare`);
         else console.log("Missing data");
     } catch (e) {
         console.error(e.response.data.errors);
@@ -113,14 +119,19 @@ const deleteNameDomain = async (domain) => {
 }
 
 const deleteJsonOrCsvOrXlsxDomain = async (domains) => {
-    for (let domain of domains) {
-        constants.ID_DOMAIN = await getDomainID(domain);
-        if (!constants.ID_DOMAIN) {
-            console.log(`${domain} domain not found in CloudFlare`);
+    domains.map(async domain => {
+        if (!ID_DOMAIN) {
+            ID_DOMAIN = await getDomainID(domain);
+            if (!ID_DOMAIN) {
+                console.log(`${domain} domain not found in CloudFlare`);
+                return;
+            }
+        } else {
+            console.log('Domain cannot be empty');
             return;
         }
 
-        dataAxios.id = constants.ID_DOMAIN;
+        dataAxios.id = ID_DOMAIN;
         // dataAxios.name = domain?.domain
         // data check if CVS or XLSX -> domain.domain. If JSON domain
         domain.domain === undefined
@@ -128,16 +139,16 @@ const deleteJsonOrCsvOrXlsxDomain = async (domains) => {
             : dataAxios.name = domain.domain
 
         configAxios.method = "DELETE";
-        configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${constants.ID_DOMAIN}`;
+        configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${ID_DOMAIN}`;
 
         try {
             const response = await axios(configAxios);
-            if (response.data.success) console.log(`${dataAxios.name} deleted successfully`);
+            if (response.status === 200) console.log(`${dataAxios.name} deleted successfully`);
             else console.log("Missing data");
         } catch (e) {
-            console.error(e.response.data)
+            console.error(e.response.data.errors);
         }
-    }
+    })
 }
 
 

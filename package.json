@@ -1,10 +1,10 @@
 {
   "name": "zg-cloudflare-updater",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "description": "aa  A CLI application to manage domains list in CloudFlare",
   "main": "index.js",
   "scripts": {
-    "start": "node ./app.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "csvtojson": "^2.0.10",
+    "dotenv": "^16.0.1",
     "xlsx": "^0.18.5"
   }
 }
