@@ -4,7 +4,8 @@
   "description": "aa  A CLI application to manage domains list in CloudFlare",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,10 @@
   "homepage": "https://gitlab.com/zgpm/zg-cloudflare-updater#readme",
   "dependencies": {
     "axios": "^0.27.2",
+    "cloudflare": "^2.9.1",
     "csvtojson": "^2.0.10",
     "dotenv": "^16.0.1",
+    "winston": "^3.8.1",
     "xlsx": "^0.18.5"
   }
 }

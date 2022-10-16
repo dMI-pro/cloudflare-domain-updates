@@ -1,6 +1,6 @@
 require('dotenv').config({path: './_env/.env.example'});
-const {CF_API_EMAIL, CF_API_KEY} = process.env;
-const {getDomainID} = require("./apiDomain");
+const {CF_API_EMAIL, CF_API_KEY, URL_ADD_DELETE_DOMAIN} = process.env;
+const {getDomainId} = require("./apiDomain");
 const axios = require("axios");
 
 const dataAxios = {
@@ -20,23 +20,33 @@ const configAxios = {
     },
 };
 
-async function getListDnsZoneIdForDomain(domain, nameDnsRecord) {
-    const idDomain = await getDomainID(domain);
+async function getInfoOfDnsZoneForDomain(domain, nameDnsRecord) {
+    const idDomain = await getDomainId(domain);
+
     configAxios.method = "GET";
-    configAxios.url = `https://api.cloudflare.com/client/v4/zones/${idDomain}/dns_records?name=${nameDnsRecord}.${domain}`;
+    configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${idDomain}/dns_records?name=${nameDnsRecord}.${domain}`;
+
     try {
         const response = await axios(configAxios);
+        if (!response.data.result[0])
+            throw new Error(`dns record ${nameDnsRecord} not found in CloudFlare for ${domain}`);
         return {
             idDomain: idDomain,
             chosenDnsRecord: response.data.result[0]
         };
     } catch (e) {
-        console.error(e.response.data.errors)
+        if (e.response) {
+            console.error(e.response.data.errors);
+            proccess.exit;
+        } else {
+            console.error(e.message);
+            proccess.exit;
+        }
     }
 }
 
 async function addDnsRecord(domain) {
-    const idDomain = await getDomainID(domain);
+    const idDomain = await getDomainId(domain);
 
     dataAxios.type = process.argv[5].toUpperCase(); // .toUpperCase
     dataAxios.name = process.argv[6];
@@ -46,23 +56,20 @@ async function addDnsRecord(domain) {
     dataAxios.proxied = Boolean(process.argv[10]) || true;
 
     configAxios.method = "POST";
-    configAxios.url = `https://api.cloudflare.com/client/v4/zones/${idDomain}/dns_records`;
+    configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${idDomain}/dns_records`;
     configAxios.data = dataAxios;
+
     try {
         const response = await axios(configAxios);
-        if (response.status === 200)
-            console.log(`dns record - ${response.data.result.type} ${response.data.result.name} ${response.data.result.content} successfully adding from CloudFlare`);
+        console.log(`Adding dns record ${response.data.result.type}|${response.data.result.name}|${response.data.result.content} successfully adding for ${domain}`);
     } catch (e) {
         console.error(e.response.data.errors)
     }
 }
 
 async function updateDnsRecord(domain, nameDnsRecord) {
-    const {idDomain, chosenDnsRecord} = await getListDnsZoneIdForDomain(domain, nameDnsRecord);
-    if (!chosenDnsRecord) {
-        console.log(`${nameDnsRecord} - dns record not found in CloudFlare`)
-        return
-    }
+    const {idDomain, chosenDnsRecord} = await getInfoOfDnsZoneForDomain(domain, nameDnsRecord);
+
     dataAxios.type = process.argv[6].toUpperCase(); // .toUpperCase
     dataAxios.name = process.argv[7];
     dataAxios.content = process.argv[8];
@@ -71,36 +78,30 @@ async function updateDnsRecord(domain, nameDnsRecord) {
     configAxios.data = dataAxios;
 
     configAxios.method = "PUT";
-    configAxios.url = `https://api.cloudflare.com/client/v4/zones/${idDomain}/dns_records/${chosenDnsRecord.id}`;
+    configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${idDomain}/dns_records/${chosenDnsRecord.id}`;
 
     try {
         const response = await axios(configAxios);
-        if (response.status === 200)
-            console.log(`dns record - ${response.data.result.type} ${response.data.result.name} ${response.data.result.content} successfully updating from CloudFlare`);
+        console.log(`Updating dns record ${nameDnsRecord} to ${response.data.result.name} successfully`);
     } catch (e) {
         console.error(e.response.data.errors)
     }
 }
 
 async function deleteDnsRecord(domain, nameDnsRecord) {
-    const {idDomain, chosenDnsRecord} = await getListDnsZoneIdForDomain(domain, nameDnsRecord);
-    if (!chosenDnsRecord) {
-        console.log(`${nameDnsRecord} - dns record not found in CloudFlare`)
-        return
-    }
+    const {idDomain, chosenDnsRecord} = await getInfoOfDnsZoneForDomain(domain, nameDnsRecord);
 
     configAxios.method = "DELETE";
-    configAxios.url = `https://api.cloudflare.com/client/v4/zones/${idDomain}/dns_records/${chosenDnsRecord.id}`;
+    configAxios.url = `${URL_ADD_DELETE_DOMAIN}/${idDomain}/dns_records/${chosenDnsRecord.id}`;
+
     try {
         const response = await axios(configAxios);
-        if (response.status === 200)
-            console.log(`${nameDnsRecord} - dns record successfully removed from CloudFlare`);
+        console.log(`${nameDnsRecord} - dns record ${nameDnsRecord} successfully removed for ${domain}`);
     } catch (e) {
-        console.error(e.response.data.errors)
+        console.error(e.response.data.errors);
     }
 }
 
-exports.getListDnsZoneIdForDomain = getListDnsZoneIdForDomain;
 exports.addDnsRecord = addDnsRecord;
 exports.updateDnsRecord = updateDnsRecord;
 exports.deleteDnsRecord = deleteDnsRecord;
