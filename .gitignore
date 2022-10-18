@@ -2,6 +2,7 @@
 node_modules
 /dist
 
+
 # local env files
 .env.local
 .env.*.local
@@ -20,17 +21,11 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
+
 
 ## Env Variables
 _env/.env.*
 !_env/.env.example
-
-
-## Resource files
-
-source/list.*
-!source/list.example.*
-
-### Winstone log files
-source/logs
-
+=======
+>>>>>>> 6b8a3ef7c86497edf8bcb5f6896c5de94a157d9e

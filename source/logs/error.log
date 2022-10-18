@@ -1,0 +1,11 @@
+{"level":"error","message":"message:projectfinew.xyz already exists; func:Adding domain from csv; code status:400;","timestamp":"2022-09-07 10:37;29"}
+{"level":"error","message":"message:projectfinew1.xyz is not a registered domain; func:Adding domain from csv; code status:400;","timestamp":"2022-09-07 10:37;30"}
+{"level":"error","message":"message:projectfinew1.xyz not found in CloudFlare func:get domain ID for projectfinew1.xyz; code status: throw new Error; ","timestamp":"2022-09-07 10:38;52"}
+{"level":"error","message":"message:projectfinew.xyz not found in CloudFlare func:get domain ID for projectfinew.xyz; code status: throw new Error; ","timestamp":"2022-09-07 10:39;14"}
+{"level":"error","message":"message:projectfinew.xyz not found in CloudFlare func:get domain ID for projectfinew.xyz; code status: throw new Error; ","timestamp":"2022-09-07 10:39;14"}
+{"level":"error","message":"message:projectfinew.xyz not found in CloudFlare func:get domain ID for projectfinew.xyz; code status: throw new Error; ","timestamp":"2022-09-07 10:39;14"}
+{"level":"error","message":"message:projectfinew1.xyz is not a registered domain; func:Adding domain from xlsx; code status:400;","timestamp":"2022-09-07 10:40;10"}
+{"level":"error","message":"message:magrarom.com already exists; func:Adding domain magrarom.com; code status:400;","timestamp":"2022-09-07 10:40;50"}
+{"level":"error","message":"message:magrarom.com already exists; func:Adding domain magrarom.com; code status:400;","timestamp":"2022-09-07 10:46;27"}
+{"level":"error","message":"message:magrarom.com already exists; func:Adding domain magrarom.com; code status:400;","timestamp":"2022-09-07 10:47;32"}
+{"level":"error","message":"message:magrarom.com already exists; func:Adding domain magrarom.com; code status:400;","timestamp":"2022-09-07 10:51;22"}
