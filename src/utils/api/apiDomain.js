@@ -1,6 +1,5 @@
-require('dotenv').config({path: './_env/.env.example'});
+require('dotenv').config({path: `./_env/.env.${process.env.NODE_ENV === "production" ? "production" : "development"}`});
 const {CF_API_EMAIL, CF_API_KEY} = process.env;
-let {ID_DOMAIN} = process.env;
 const {customerLoggerInfo, customerLoggerError} = require('../../../src/utils/controller/logger');
 
 const cf = require('cloudflare')({
@@ -44,10 +43,7 @@ const addNameDomain = async (domain) => {
 const addJsonOrCsvOrXlsxDomain = async (domains, source) => {
     domains.map(async domain => {
         // data check if CVS or XLSX -> domain.domain, if JSON domain
-        let curDomain = '';
-        domain.domain === undefined
-            ? curDomain = domain
-            : curDomain = domain.domain
+        let curDomain = domain.domain || domain;
 
         try {
             const response = await cf.zones.add({name: curDomain});
@@ -63,11 +59,11 @@ const addJsonOrCsvOrXlsxDomain = async (domains, source) => {
 // functions for deleting a domain
 
 const deleteNameDomain = async (domain) => {
-    ID_DOMAIN = await getDomainId(domain);
-    if (!ID_DOMAIN) return;
+    const idDomain  = await getDomainId(domain);
+    if (!idDomain) return;
 
     try {
-        const response = await cf.zones.del(ID_DOMAIN);
+        const response = await cf.zones.del(idDomain);
         customerLoggerInfo.log('info', `Deleting domain ${domain} successfully`);
         console.log(`Deleting domain ${domain} successfully`);
     } catch (e) {
@@ -79,16 +75,13 @@ const deleteNameDomain = async (domain) => {
 const deleteJsonOrCsvOrXlsxDomain = async (domains, source) => {
     domains.map(async domain => {
         // data check if CVS or XLSX -> domain.domain, if JSON domain
-        let curDomain = '';
-        domain.domain === undefined
-            ? curDomain = domain
-            : curDomain = domain.domain
+        let curDomain = domain.domain || domain;
 
-        ID_DOMAIN = await getDomainId(curDomain);
-        if (!ID_DOMAIN) return;
+        const idDomain = await getDomainId(curDomain);
+        if (!idDomain) return;
 
         try {
-            const response = await cf.zones.del(ID_DOMAIN);
+            const response = await cf.zones.del(idDomain);
             customerLoggerInfo.log('info', `Deleting domain ${curDomain} successfully`);
             console.log(`Deleting domain ${curDomain} successfully`);
         } catch (e) {

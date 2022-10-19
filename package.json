@@ -1,16 +1,18 @@
 {
   "name": "zg-cloudflare-updater",
-  "version": "1.3.1",
+  "version": "1.4.1",
   "description": "A CLI application to manage domains list and dns records in CloudFlare",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "cross-env NODE_ENV=development node index",
+    "dev": "cross-env NODE_ENV=development node index",
+    "prod": "cross-env NODE_ENV=production node index"
   },
   "repository": {
     "type": "git",
     "url": "git+https://gitlab.com/zgpm/zg-cloudflare-updater.git"
   },
-  "author": "",
+  "author": "Dmitriy Prokhvataev <dmitriy@zgpm.pro>",
   "license": "ISC",
   "bugs": {
     "url": "https://gitlab.com/zgpm/zg-cloudflare-updater/issues"
@@ -18,6 +20,7 @@
   "homepage": "https://gitlab.com/zgpm/zg-cloudflare-updater#readme",
   "dependencies": {
     "cloudflare": "^2.9.1",
+    "cross-env": "^7.0.3",
     "csvtojson": "^2.0.10",
     "dotenv": "^16.0.1",
     "winston": "^3.8.1",

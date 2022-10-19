@@ -1,6 +1,5 @@
-require('dotenv').config({path: './_env/.env.example'});
+require('dotenv').config({path: `./_env/.env.${process.env.NODE_ENV === "production" ? "production" : "development"}`});
 const {CF_API_EMAIL, CF_API_KEY} = process.env;
-let {ID_DOMAIN} = process.env;
 const {getDomainId} = require("./apiDomain");
 const {customerLoggerInfo, customerLoggerError} = require('../../../src/utils/controller/logger');
 
@@ -10,37 +9,37 @@ const cf = require('cloudflare')({
 });
 
 async function getInfoOfDnsZoneForDomain(domain, nameDnsRecord) {
-    ID_DOMAIN = await getDomainId(domain);
+    const idDomain = await getDomainId(domain);
 
     try {
-        const response = await cf.dnsRecords.browse(ID_DOMAIN);
-        const listDnsRecords = response.result.filter(item => item.name.split('.')[0] === nameDnsRecord);
-        if (!listDnsRecords[0])
+        const response = await cf.dnsRecords.browse(idDomain);
+        const listDnsRecords = response.result.find(item => item.name.split('.')[0] === nameDnsRecord);
+        if (!listDnsRecords)
             throw new Error(`dns record ${nameDnsRecord} not found in CloudFlare for ${domain}`);
 
         customerLoggerInfo.log('info', `get info by dns record - ${nameDnsRecord} for ${domain}`);
         return {
-            ID_DOMAIN: ID_DOMAIN,
+            idDomain: idDomain,
             chosenDnsRecord: listDnsRecords[0]
         };
     } catch (e) {
         if (e.response) {
             customerLoggerError.log('error', `message:${e.response.data.errors[0].message}; func:get info by dns record - ${nameDnsRecord}; code status:${e.response.status};`);
             console.error(e.response.data.errors);
-            proccess.exit // завершить приложение ? Cannot destructure property 'ID_DOMAIN' it is undefined.
+            proccess.exit(1) // завершить приложение ? Cannot destructure property 'idDomain' it is undefined.
         } else {
             customerLoggerError.log('error', `message:${e.message} func:get info by dns record - ${nameDnsRecord}; code status: throw new Error; `);
             console.error(e.message);
-            proccess.exit // завершить приложение ? Cannot destructure property 'ID_DOMAIN' it is undefined.
+            proccess.exit(1) // завершить приложение ? Cannot destructure property 'idDomain' it is undefined.
         }
     }
 }
 
 async function addDnsRecord(domain, dataDnsRecordAdd) {
-    ID_DOMAIN = await getDomainId(domain);
+    const idDomain = await getDomainId(domain);
 
     try {
-        const response = await cf.dnsRecords.add(ID_DOMAIN, dataDnsRecordAdd);
+        const response = await cf.dnsRecords.add(idDomain, dataDnsRecordAdd);
         customerLoggerInfo.log('info', `Adding dns record ${response.result.type}|${response.result.name}|${response.result.content} successfully`);
         console.log(`Adding dns record ${response.result.type}|${response.result.name}|${response.result.content} successfully`);
     } catch (e) {
@@ -50,10 +49,10 @@ async function addDnsRecord(domain, dataDnsRecordAdd) {
 }
 
 async function updateDnsRecord(domain, nameDnsRecord, dataDnsRecordUpdate) {
-    const {ID_DOMAIN, chosenDnsRecord} = await getInfoOfDnsZoneForDomain(domain, nameDnsRecord);
+    const {idDomain, chosenDnsRecord} = await getInfoOfDnsZoneForDomain(domain, nameDnsRecord);
 
     try {
-        const response = await cf.dnsRecords.edit(ID_DOMAIN, chosenDnsRecord.id, dataDnsRecordUpdate);
+        const response = await cf.dnsRecords.edit(idDomain, chosenDnsRecord.id, dataDnsRecordUpdate);
         customerLoggerInfo.log('info', `Updating dns record ${chosenDnsRecord.type}|${chosenDnsRecord.name}|${chosenDnsRecord.content} to ${response.result.type}|${response.result.name}|${response.result.content} successfully`);
         console.log(`Updating dns record ${chosenDnsRecord.type}|${chosenDnsRecord.name}|${chosenDnsRecord.content} to ${response.result.type}|${response.result.name}|${response.result.content} successfully`);
     } catch (e) {
@@ -63,10 +62,10 @@ async function updateDnsRecord(domain, nameDnsRecord, dataDnsRecordUpdate) {
 }
 
 async function deleteDnsRecord(domain, nameDnsRecord) {
-    const {ID_DOMAIN, chosenDnsRecord} = await getInfoOfDnsZoneForDomain(domain, nameDnsRecord);
+    const {idDomain, chosenDnsRecord} = await getInfoOfDnsZoneForDomain(domain, nameDnsRecord);
 
     try {
-        const response = await cf.dnsRecords.del(ID_DOMAIN, chosenDnsRecord.id);
+        const response = await cf.dnsRecords.del(idDomain, chosenDnsRecord.id);
         customerLoggerInfo.log('info', `Deleting dns record ${nameDnsRecord} successfully for ${domain}`);
         console.log(`${nameDnsRecord} - dns record successfully removed for ${domain}`);
     } catch (e) {
